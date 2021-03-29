@@ -15,7 +15,7 @@ class ReasonDiagonal extends Reason{
     }
 }
 
-<<<<<<< HEAD
+
 class ReasonHorizontal extends Reason{
     ReasonHorizontal(String reason){
         this.reason=reason;
@@ -36,8 +36,7 @@ class ReasonVertical extends Reason{
     }
 }
 
-=======
->>>>>>> 686fdba4f52820534f718f9a9d5bda2043cea6a9
+
 class ReasonX extends Reason{
     ReasonX(String reason){
         this.reason = reason;
