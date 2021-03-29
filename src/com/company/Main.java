@@ -1,18 +1,39 @@
 package com.company;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
-class MarupekeGrid{
-    MarupekeTile[][] marupekeTiles;
 
-    MarupekeGrid(MarupekeTile[][] marupekeTiles){
+class MarupekeGrid{
+    int size;
+    MarupekeTile[][] marupekeTiles;
+    boolean isLegalGrid;
+    List<Reason> illegalitiesInGrid;
+
+    MarupekeGrid(MarupekeTile[][] marupekeTiles,int size){
         this.marupekeTiles=marupekeTiles;
+        this.size=size;
+
+        //Setting up isLegalGrid value
+        if(size>10 || size<3) {
+            isLegalGrid = false;
+            illegalitiesInGrid= new ArrayList<Reason>();
+        } else{
+            isLegalGrid = true;
+            intilizeAllMaupekeTiles(marupekeTiles,size);
+            printTiles(marupekeTiles,size);
+
+        }
+
     }
 
     // intilizeAllMaupekeTiles intitilzes Grid to all Blank
     void intilizeAllMaupekeTiles(MarupekeTile[][] marupekeTiles,int size){
         Tile tile=Tile.BLANK;
+        isLegalGrid = false;
+        illegalitiesInGrid= new ArrayList<Reason>();
         for(int i=0;i<size;i++){
             for(int j=0;j<size;j++){
                 marupekeTiles[i][j] = new MarupekeTile(true,tile);
@@ -21,8 +42,120 @@ class MarupekeGrid{
 
     }
 
-    // printGrid prints out the Marupeke Grid
-    void printGrid(MarupekeTile[][] marupekeTiles,int size){
+    void checkIllegalitiesInGrid(boolean isLegalGrid, MarupekeGrid marupekeGrid){
+        if(isLegalGrid==false) {
+            if (marupekeGrid.size > 10) {
+
+                ReasonDiagonal reasonDiagonal = new ReasonDiagonal("Grid size cannot be greater then 10");
+                illegalitiesInGrid.add(reasonDiagonal);
+
+            } else if(marupekeGrid.size < 3){
+                ReasonDiagonal reasonDiagonal = new ReasonDiagonal("Grid size cannot be less then 3");
+                illegalitiesInGrid.add(reasonDiagonal);
+            } else {
+                // Scanning for Horizontal violation [x,y] [x,y+1] and [x,y+2]
+                for(int i = 0; i < size; i++) {
+                    for (int j = 0; j < size-2; j++) {
+                        if(marupekeGrid.marupekeTiles[i][j].tile == marupekeGrid.marupekeTiles[i][j+1].tile &&
+                                marupekeGrid.marupekeTiles[i][j].tile == marupekeGrid.marupekeTiles[i][j+2].tile){
+                            ReasonHorizontal reasonHorizontal = new ReasonHorizontal("Grid violation at grid coordinates " + i +"," + j +" "+ i +"," + (j+1) + " and "
+                            + i +"," + (j+2));
+                            illegalitiesInGrid.add(reasonHorizontal);
+                        }
+                    }
+                }
+
+                // Scanning for Horizontal violation [x,y] [x,y-1] and [x,y-2]
+                for(int i = 0; i < size; i++) {
+                    for (int j = size-1; j > 1; j--) {
+                        if(marupekeGrid.marupekeTiles[i][j].tile == marupekeGrid.marupekeTiles[i][j-1].tile &&
+                                marupekeGrid.marupekeTiles[i][j].tile == marupekeGrid.marupekeTiles[i][j-2].tile){
+                            ReasonHorizontal reasonHorizontal = new ReasonHorizontal("Grid violation at grid coordinates " + i +"," + j +" "+ i +"," + (j-1) + " and "
+                                    + i +"," + (j-2));
+                            illegalitiesInGrid.add(reasonHorizontal);
+                        }
+                    }
+                }
+
+                // Scanning for Vertical violation [x,y] [x+1,y] and [x+2,y]
+                for(int i = 0; i < size-2; i++) {
+                    for (int j = 0; j < size; j++) {
+                        if(marupekeGrid.marupekeTiles[i][j].tile == marupekeGrid.marupekeTiles[i+1][j].tile &&
+                                marupekeGrid.marupekeTiles[i][j].tile == marupekeGrid.marupekeTiles[i+2][j].tile){
+                            ReasonVertical reasonVertical = new ReasonVertical("Grid violation at grid coordinates " + i +"," + j +" "+ (i+1) +"," + j + " and "
+                                    + (i+2) +"," + j);
+                            illegalitiesInGrid.add(reasonVertical);
+                        }
+                    }
+                }
+
+                // Scanning for Vertical violation [x,y] [x-1,y] and [x-2,y]
+                for(int i = size-1; i > 1; i--) {
+                    for (int j = 0; j < size; j++) {
+                        if(marupekeGrid.marupekeTiles[i][j].tile == marupekeGrid.marupekeTiles[i-1][j].tile &&
+                                marupekeGrid.marupekeTiles[i][j].tile == marupekeGrid.marupekeTiles[i-2][j].tile){
+                            ReasonVertical reasonVertical = new ReasonVertical("Grid violation at grid coordinates " + i +"," + j +" "+ (i-1) +"," + j + " and "
+                                    + (i-2) +"," + j);
+                            illegalitiesInGrid.add(reasonVertical);
+                        }
+                    }
+                }
+
+                // Scanning for Diagonal violation [x,y] [x+1,y-1] and [x+2,y-2]
+                for(int i = 0; i < size-2; i++) {
+                    for (int j = size-1; j > 1; j--) {
+                        if(marupekeGrid.marupekeTiles[i][j].tile == marupekeGrid.marupekeTiles[i+1][j-1].tile &&
+                                marupekeGrid.marupekeTiles[i][j].tile == marupekeGrid.marupekeTiles[i+2][j-2].tile){
+                            ReasonDiagonal reasonDiagonal = new ReasonDiagonal("Grid violation at grid coordinates " + i +"," + j +" "+ (i+1) +"," + (j-1) + " and "
+                                    + (i+2) +"," + (j-2));
+                            illegalitiesInGrid.add(reasonDiagonal);
+                        }
+                    }
+                }
+
+                // Scanning for Diagonal violation [x,y] [x-1,y+1] and [x-2,y+2]
+                for(int i = size-1; i > 1; i--) {
+                    for (int j = 0; j < size-2; j++) {
+                        if(marupekeGrid.marupekeTiles[i][j].tile == marupekeGrid.marupekeTiles[i-1][j+1].tile &&
+                                marupekeGrid.marupekeTiles[i][j].tile == marupekeGrid.marupekeTiles[i-2][j+2].tile){
+                            ReasonDiagonal reasonDiagonal = new ReasonDiagonal("Grid violation at grid coordinates " + i +"," + j +" "+ (i-1) +"," + (j+1) + " and "
+                                    + (i-2) +"," + (j+2));
+                            illegalitiesInGrid.add(reasonDiagonal);
+                        }
+                    }
+                }
+
+                // Scanning for Diagonal violation [x,y] [x-1,y-1] and [x-2,y-2]
+                for(int i = size-1; i > 1; i--) {
+                    for (int j = size-1; j > 1; j--) {
+                        if(marupekeGrid.marupekeTiles[i][j].tile == marupekeGrid.marupekeTiles[i-1][j-1].tile &&
+                                marupekeGrid.marupekeTiles[i][j].tile == marupekeGrid.marupekeTiles[i-2][j-2].tile){
+                            ReasonDiagonal reasonDiagonal = new ReasonDiagonal("Grid violation at grid coordinates " + i +"," + j +" "+ (i-1) +"," + (j-1) + " and "
+                                    + (i-2) +"," + (j-2));
+                            illegalitiesInGrid.add(reasonDiagonal);
+                        }
+                    }
+                }
+
+                // Scanning for Diagonal violation [x,y] [x+1,y+1] and [x+2,y+2]
+                for(int i = 0; i < size-2; i++) {
+                    for (int j = 0; j < size-2; j++) {
+                        if(marupekeGrid.marupekeTiles[i][j].tile == marupekeGrid.marupekeTiles[i+1][j+1].tile &&
+                                marupekeGrid.marupekeTiles[i][j].tile == marupekeGrid.marupekeTiles[i+2][j+2].tile){
+                            ReasonDiagonal reasonDiagonal = new ReasonDiagonal("Grid violation at grid coordinates " + i +"," + j +" "+ (i+1) +"," + (j+1) + " and "
+                                    + (i+2) +"," + (j+2));
+                            illegalitiesInGrid.add(reasonDiagonal);
+                        }
+                    }
+                }
+
+            }
+
+        }
+    }
+
+    //printTiles will print put out only if Grid value is legal
+    void printTiles(MarupekeTile[][] marupekeTiles,int size){
         for(int i=0;i<size;i++){
             for(int j=0;j<size;j++){
                 System.out.println(marupekeTiles[i][j].tile);
@@ -33,6 +166,7 @@ class MarupekeGrid{
     }
 
 }
+
 public class Main{
     public static void main(String[] args) {
         int size;
@@ -49,22 +183,20 @@ public class Main{
         // Closing Scanner after the use
         scan.close();
 
-        Tile tile=Tile.BLANK;
-        MarupekeTile marupekeTiles= new MarupekeTile();
-
+        //Initializing Marupeke Tile Array
         MarupekeTile[][] marupekeTileArray=new MarupekeTile[size][size];
 
-        MarupekeGrid marupekeGrid = new MarupekeGrid(marupekeTileArray);
+        //Initializing Marupeke Grid
+        MarupekeGrid marupekeGrid = new MarupekeGrid(marupekeTileArray,size);
+
         marupekeGrid.intilizeAllMaupekeTiles(marupekeTileArray,size);
 
-        Tile[][] tiles=new Tile[size][size];
+        //Checking for Maurpeke Grid legality conditions
+        marupekeGrid.checkIllegalitiesInGrid(marupekeGrid.isLegalGrid,marupekeGrid);
 
-        tiles[1][1]=Tile.X;
+        System.out.println(marupekeGrid.illegalitiesInGrid);
+        System.out.println(marupekeGrid.isLegalGrid);
 
-
-        marupekeTiles.tile=Tile.O;
-
-        marupekeGrid.printGrid(marupekeTileArray,size);
 
     }
 
