@@ -52,6 +52,7 @@ class MarupekeGrid{
             } else if(marupekeGrid.size < 3){
                 ReasonDiagonal reasonDiagonal = new ReasonDiagonal("Grid size cannot be less then 3");
                 illegalitiesInGrid.add(reasonDiagonal);
+<<<<<<< HEAD
             } else {
                 // Scanning for Horizontal violation [x,y] [x,y+1] and [x,y+2]
                 for(int i = 0; i < size; i++) {
@@ -151,6 +152,10 @@ class MarupekeGrid{
 
             }
 
+=======
+
+            }
+>>>>>>> 686fdba4f52820534f718f9a9d5bda2043cea6a9
         }
     }
 
@@ -188,8 +193,11 @@ public class Main{
 
         //Initializing Marupeke Grid
         MarupekeGrid marupekeGrid = new MarupekeGrid(marupekeTileArray,size);
+<<<<<<< HEAD
 
         marupekeGrid.intilizeAllMaupekeTiles(marupekeTileArray,size);
+=======
+>>>>>>> 686fdba4f52820534f718f9a9d5bda2043cea6a9
 
         //Checking for Maurpeke Grid legality conditions
         marupekeGrid.checkIllegalitiesInGrid(marupekeGrid.isLegalGrid,marupekeGrid);
