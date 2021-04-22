@@ -1,9 +1,30 @@
 package com.company;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.awt.*;
+import java.util.*;
 import java.util.List;
-import java.util.Scanner;
+
+import javafx.application.Application;
+import javafx.beans.InvalidationListener;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableListValue;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.geometry.Pos;
+import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
 
 
 class MarupekeGrid{
@@ -28,6 +49,7 @@ class MarupekeGrid{
         }
 
     }
+
 
     // intilizeAllMaupekeTiles intitilzes Grid to all Blank
     void intilizeAllMaupekeTiles(MarupekeTile[][] marupekeTiles,int size){
@@ -164,12 +186,110 @@ class MarupekeGrid{
             System.out.println("\n\r");
         }
 
+
+    }
+
+    public GridPane createGrid(BooleanProperty[][] binaryController) {
+
+        int columns = binaryController.length ;
+        int rows = binaryController[0].length ;
+
+        GridPane grid = new GridPane();
+
+        for (int x = 0 ; x < columns ; x++) {
+            ColumnConstraints columnConstraints = new ColumnConstraints();
+            columnConstraints.setFillWidth(true);
+            columnConstraints.setHgrow(Priority.ALWAYS);
+            grid.getColumnConstraints().add(columnConstraints);
+        }
+
+        for (int y = 0 ; y < rows ; y++) {
+            RowConstraints rowConstraints = new RowConstraints();
+            rowConstraints.setFillHeight(true);
+            rowConstraints.setVgrow(Priority.ALWAYS);
+            grid.getRowConstraints().add(rowConstraints);
+        }
+
+        for (int x = 0 ; x < columns ; x++) {
+            for (int y = 0 ; y < rows ; y++) {
+                grid.add(createCell(binaryController[x][y]),x,y);
+            }
+        }
+
+
+        grid.getStyleClass().add("grid");
+        return grid;
+    }
+    public GridPane createCell(BooleanProperty booleanControl) {
+
+        GridPane gridpane = new GridPane();
+
+        Line line1 = new Line(-25,25,25,-25);
+        Line line2 = new Line(-25,-25,25,25);
+        Group group = new Group(line1,line2);
+        Circle circle = new Circle(20, Color.CORNFLOWERBLUE);
+        Rectangle rectangle = new Rectangle(50,50);
+
+        List<ObservableList> list = new ArrayList<>();
+
+
+        gridpane.setOnMouseClicked(event -> {
+            if(event.getClickCount()==1) {gridpane.getChildren().removeAll(group,rectangle); gridpane.getChildren().add(circle);
+            gridpane.getChildren().forEach(Node->{System.out.println(Node);});
+            list.add(gridpane.getChildren());
+            }
+            if(event.getClickCount()==2)  {gridpane.getChildren().removeAll(circle,rectangle); gridpane.getChildren().add(group);
+            gridpane.getChildren().forEach(Node->{System.out.println(Node);});
+            list.add(gridpane.getChildren());
+            }
+            if(event.getClickCount()==3)  {gridpane.getChildren().removeAll(circle,group); gridpane.getChildren().add(rectangle);
+            gridpane.getChildren().forEach(Node->{System.out.println(Node);});
+            list.add(gridpane.getChildren());
+            }
+            if(event.getClickCount()>3 ||  event.getClickCount()<=0) {gridpane.getChildren().removeAll(circle,group,rectangle);
+            gridpane.getChildren().forEach(Node->{System.out.println(Node);});
+            list.add(gridpane.getChildren());
+            }
+            System.out.println(list);
+
+        });
+
+        //System.out.println(list);
+
+
+        gridpane.getStyleClass().add("cell");
+        gridpane.setStyle("-fx-padding: 10;" +
+                "-fx-border-style: solid inside;" +
+                "-fx-border-width: 2;" +
+                "-fx-border-insets: 5;" +
+                "-fx-border-radius: 5;" +
+                "-fx-border-color: red;");
+        return gridpane;
+    }
+
+    public void checkIfGridIsFull(GridPane grid){
+        ObservableList<Node> gridChildren = grid.getChildren();
+        if(gridChildren!=null) {
+            gridChildren.forEach(Node->{
+                System.out.println(Node);
+            });
+        }
     }
 
 }
 
-public class Main{
+//Main class
+public class Main extends Application{
     public static void main(String[] args) {
+
+        launch(args);
+    }
+
+
+
+    //Start method begins here
+    @Override
+    public void start(Stage primaryStage) {
         int size;
 
         /*  This reads the size of grid
@@ -199,6 +319,76 @@ public class Main{
 
         System.out.println(marupekeGrid.illegalitiesInGrid);
         System.out.println(marupekeGrid.isLegalGrid);
+
+
+
+        BooleanProperty[][] binaryController = new BooleanProperty[size][size];
+        for (int x = 0 ; x < size ; x++) {
+            for (int y = 0 ; y < size ; y++) {
+                binaryController[x][y] = new SimpleBooleanProperty();
+            }
+        }
+
+        GridPane grid = marupekeGrid.createGrid(binaryController);
+
+        marupekeGrid.checkIfGridIsFull(grid);
+
+        StackPane stackPane = new StackPane(grid);
+
+        Button submit = new Button("Submit");
+
+        submit.setOnMouseClicked(event ->{
+            if(event.getClickCount()==1){
+                ((Stage)(((Button)event.getSource()).getScene().getWindow())).close();
+                //Checking for Maurpeke Grid legality conditions
+                marupekeGrid.checkIllegalitiesInGrid(marupekeGrid.isLegalGrid,marupekeGrid);
+            }
+
+        });
+
+        grid.add(submit,size-size/3,size);
+
+
+        stackPane.setStyle("-fx-padding: 10;" +
+                "-fx-border-style: solid inside;" +
+                "-fx-border-width: 2;" +
+                "-fx-border-insets: 5;" +
+                "-fx-border-radius: 5;" +
+                "-fx-border-color: blue;");
+
+        grid.setStyle("-fx-padding: 10;" +
+                "-fx-border-style: solid inside;" +
+                "-fx-border-width: 2;" +
+                "-fx-border-insets: 5;" +
+                "-fx-border-radius: 5;" +
+                "-fx-border-color: green;");
+
+        //This sets the main scene
+        Scene scene = new Scene(stackPane, 600, 600);
+
+        //Subsequent scenes
+        Scene scene1, scene2;
+
+        //Scene 2
+        Label label1= new Label("Click 3 times on the grid to set up the constraints");
+        Button button1= new Button("Click here to start!");
+        button1.setOnAction(e -> primaryStage.setScene(scene));
+        VBox vbox1 = new VBox(20);
+        vbox1.getChildren().addAll(label1, button1);
+        scene2= new Scene(vbox1, 500, 500);
+
+        //Scene 1
+        Label label= new Label("Do you want to play the game?");
+        Button button= new Button("Click to play!");
+        button.setOnAction(e -> primaryStage.setScene(scene2));
+        VBox vbox = new VBox(20);
+        vbox.getChildren().addAll(label, button);
+        scene1= new Scene(vbox, 300, 250);
+
+        //primaryStage starts from Scene1
+        primaryStage.setScene(scene1);
+        primaryStage.setTitle("Marupeke Game");
+        primaryStage.show();
 
 
     }

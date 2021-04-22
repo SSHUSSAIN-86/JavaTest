@@ -1,7 +1,5 @@
 package com.company;
 
-
-
 public class MarupekeTile {
     boolean isEditable;
     Tile tile;
@@ -11,7 +9,7 @@ public class MarupekeTile {
         this.tile=tile;
 
     }
-    MarupekeTile(){}
+
     void setisEditable(boolean value){
         isEditable=value;
     }
